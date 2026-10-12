@@ -1,26 +1,36 @@
-import { AccessToken } from "livekit-server-sdk";
+import {
+  assertRoomExists,
+  issueToken,
+  normalizeRoomName,
+} from "../lib/rooms.js";
 
 export default async function handler(req, res) {
-  const role = req.query.role === "broadcaster" ? "broadcaster" : "viewer";
+  try {
+    const role = req.query.role === "broadcaster" ? "broadcaster" : "viewer";
+    const displayName = String(req.query.name || "anon").slice(0, 32);
 
-  if (role === "broadcaster" && req.query.key !== process.env.TELADOR_KEY) {
-    return res.status(401).json({ error: "chave inválida" });
+    // Broadcaster: a key da config é o nome da sala.
+    // Viewer: passa room= (mesmo nome/chave da sala).
+    const room = normalizeRoomName(
+      role === "broadcaster" ? req.query.key : req.query.room
+    );
+
+    if (!room) {
+      return res.status(400).json({
+        error:
+          role === "broadcaster"
+            ? "informe a key (nome da sala)"
+            : "informe o código da sala",
+      });
+    }
+
+    if (!(await assertRoomExists(room))) {
+      return res.status(404).json({ error: "sala não encontrada" });
+    }
+
+    const token = await issueToken({ role, displayName, room });
+    res.json({ token, room });
+  } catch (e) {
+    res.status(500).json({ error: e.message || "erro ao emitir token" });
   }
-
-  const name = String(req.query.name || "anon").slice(0, 32);
-  const identity = `${name}-${Math.random().toString(36).slice(2, 7)}`;
-
-  const at = new AccessToken(
-    process.env.LIVEKIT_API_KEY,
-    process.env.LIVEKIT_API_SECRET,
-    { identity, name, metadata: role }
-  );
-  at.addGrant({
-    room: "galera",
-    roomJoin: true,
-    canSubscribe: true,
-    canPublish: role === "broadcaster",
-    canPublishData: true,
-  });
-  res.json({ token: await at.toJwt() });
 }

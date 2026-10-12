@@ -17,6 +17,7 @@ export default defineConfig({
         main: r("./index.html"),
         broadcaster: r("./broadcaster.html"),
         transmissor: r("./transmissor.html"),
+        salas: r("./salas.html"),
       },
     },
   },

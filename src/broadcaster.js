@@ -13,6 +13,7 @@ document.getElementById("btn").onclick = async () => {
     const data = await res.json();
     log("resposta da API: " + (data.token ? "token ok" : JSON.stringify(data)));
     if (!data.token) return;
+    if (data.room) log("sala: " + data.room);
 
     // lê o payload do token só para diagnóstico
     const payload = JSON.parse(atob(data.token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));

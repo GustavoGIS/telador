@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Telador — Salas</title>
+    <style>
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        background: #0b0b0f;
+        color: #eee;
+        font-family: system-ui, sans-serif;
+      }
+      main {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: -0.03em;
+      }
+      p {
+        margin: 0;
+        color: #9aa0a6;
+        font-size: 14px;
+        line-height: 1.45;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        color: #aaa;
+        margin-bottom: 6px;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 11px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+        font-size: 15px;
+        outline: none;
+      }
+      input:focus { border-color: #5865f2; }
+      .row {
+        display: flex;
+        gap: 8px;
+      }
+      .row input { flex: 1; }
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 11px 14px;
+        cursor: pointer;
+        background: #5865f2;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      button.danger {
+        background: transparent;
+        color: #f0a0a0;
+        border: 1px solid rgba(240, 160, 160, 0.35);
+      }
+      button:disabled { opacity: 0.55; cursor: wait; }
+      .msg {
+        min-height: 1.2em;
+        font-size: 13px;
+        color: #9aa0a6;
+      }
+      .msg.error { color: #f0a0a0; }
+      .msg.ok { color: #8fd49a; }
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      li code {
+        font-size: 15px;
+        color: #fff;
+      }
+      .meta { font-size: 12px; color: #777; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div>
+        <h1>Salas Telador</h1>
+        <p>
+          Máximo de 5 salas. O nome da sala é a key: use no transmissor e peça
+          para os espectadores digitarem o mesmo código na Activity.
+        </p>
+        <p class="meta" id="count">0 / 5 salas</p>
+      </div>
+
+      <div>
+        <label for="admin">Chave admin (coreano)</label>
+        <input id="admin" type="password" autocomplete="current-password" />
+      </div>
+
+      <div>
+        <label for="name">Nova sala</label>
+        <div class="row">
+          <input id="name" placeholder="ex: festa, squad1" autocomplete="off" spellcheck="false" />
+          <button type="button" id="create">Criar</button>
+        </div>
+      </div>
+
+      <div class="msg" id="msg"></div>
+      <ul id="list"></ul>
+    </main>
+    <script type="module" src="/src/salas.js"></script>
+  </body>
+</html>

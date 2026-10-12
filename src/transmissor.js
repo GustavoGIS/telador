@@ -24,7 +24,7 @@ async function connect() {
     setTimeout(run, 5000);
   });
   await room.connect(`wss://${import.meta.env.VITE_LIVEKIT_HOST}`, data.token);
-  T.setStatus("Conectado");
+  T.setStatus("Conectado · sala " + (data.room || cfg.key));
 }
 
 async function run() {
