@@ -26,6 +26,8 @@ document.getElementById("btn").onclick = async () => {
     const pub = await room.localParticipant.setScreenShareEnabled(
       true,
       {
+        audio: true,
+        systemAudio: "include",
         resolution: { width: 1920, height: 1080, frameRate: 30 },
         contentHint: "detail",
       },

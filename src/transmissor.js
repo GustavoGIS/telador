@@ -51,7 +51,12 @@ window.__startShare = async () => {
   if (sharing) return;
   await room.localParticipant.setScreenShareEnabled(
     true,
-    { resolution: { width: 1920, height: 1080, frameRate: 30 }, contentHint: "detail" },
+    {
+      audio: true,
+      systemAudio: "include",
+      resolution: { width: 1920, height: 1080, frameRate: 30 },
+      contentHint: "detail",
+    },
     {
       videoCodec: "h264",
       simulcast: false,

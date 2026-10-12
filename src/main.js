@@ -1,27 +1,25 @@
 import { DiscordSDK } from "@discord/embedded-app-sdk";
-import { Room, RoomEvent } from "livekit-client";
-
-const logEl = document.getElementById("log");
-const log = (m) => {
-  logEl.textContent += m + "\n";
-  logEl.textContent = logEl.textContent.trim().split("\n").slice(-6).join("\n");
-};
+import { Room, RoomEvent, Track } from "livekit-client";
 
 async function start() {
   const clientId = import.meta.env.VITE_DISCORD_CLIENT_ID;
 
   const sdk = new DiscordSDK(clientId);
   await sdk.ready();
-  log("SDK pronto");
 
   const tokenUrl = "/.proxy/api/token?role=viewer&name=espectador";
   const wsUrl = `wss://${clientId}.discordsays.com/.proxy/livekit`;
   const { token } = await (await fetch(tokenUrl)).json();
-  log("Token recebido");
 
   const room = new Room({ adaptiveStream: false, dynacast: false });
   const videoEl = document.getElementById("video");
-  const barEl = document.getElementById("bar");
+  const audioEl = document.getElementById("audio");
+  const menuEl = document.getElementById("menu");
+  const listEl = document.getElementById("broadcasters");
+  const toggleEl = document.getElementById("toggle");
+
+  let activeTarget = null;
+  const volumes = Object.create(null);
 
   const send = (msg) =>
     room.localParticipant.publishData(
@@ -29,36 +27,137 @@ async function start() {
       { reliable: true, topic: "telador" }
     );
 
-  function renderBar() {
-    barEl.innerHTML = "";
+  function getVolume(name) {
+    return volumes[name] ?? 0.8;
+  }
+
+  function applyVolume() {
+    audioEl.volume = activeTarget ? getVolume(activeTarget) : 0.8;
+  }
+
+  function unlockAudio() {
+    applyVolume();
+    audioEl.play().catch(() => {});
+  }
+
+  function setMenuOpen(open) {
+    menuEl.classList.toggle("open", open);
+    toggleEl.classList.toggle("open", open);
+    toggleEl.setAttribute("aria-expanded", open ? "true" : "false");
+    toggleEl.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+    if (open) unlockAudio();
+  }
+
+  toggleEl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    setMenuOpen(!menuEl.classList.contains("open"));
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!document.getElementById("controls").contains(e.target)) {
+      setMenuOpen(false);
+    }
+  });
+
+  function renderMenu() {
+    listEl.innerHTML = "";
+    let count = 0;
+
     for (const p of room.remoteParticipants.values()) {
       if (p.metadata !== "broadcaster") continue;
-      const b = document.createElement("button");
-      b.textContent = (p.isScreenShareEnabled ? "● " : "") + "Tela de " + p.name;
-      b.onclick = () => send({ type: "present", target: p.name });
-      barEl.appendChild(b);
+      count++;
+
+      const item = document.createElement("div");
+      item.className = "item" + (activeTarget === p.name ? " active" : "");
+
+      const pick = document.createElement("button");
+      pick.type = "button";
+      pick.className = "pick";
+      pick.role = "menuitem";
+      pick.textContent = (p.isScreenShareEnabled ? "● " : "") + "Tela de " + p.name;
+      pick.onclick = () => {
+        activeTarget = p.name;
+        applyVolume();
+        unlockAudio();
+        send({ type: "present", target: p.name });
+        renderMenu();
+      };
+
+      const volRow = document.createElement("div");
+      volRow.className = "volume-row";
+
+      const label = document.createElement("span");
+      label.textContent = "Volume";
+
+      const slider = document.createElement("input");
+      slider.type = "range";
+      slider.min = "0";
+      slider.max = "100";
+      slider.value = String(Math.round(getVolume(p.name) * 100));
+      slider.setAttribute("aria-label", "Volume de " + p.name);
+      slider.oninput = () => {
+        const v = Number(slider.value) / 100;
+        volumes[p.name] = v;
+        if (activeTarget === p.name) {
+          audioEl.volume = v;
+          unlockAudio();
+        }
+      };
+
+      volRow.append(label, slider);
+      item.append(pick, volRow);
+      listEl.appendChild(item);
     }
+
+    if (count === 0) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "Nenhum transmissor";
+      listEl.appendChild(empty);
+    }
+
     const stop = document.createElement("button");
+    stop.type = "button";
+    stop.className = "stop";
+    stop.role = "menuitem";
     stop.textContent = "Parar";
-    stop.style.background = "rgba(80, 80, 80, 0.9)";
-    stop.onclick = () => send({ type: "present", target: null });
-    barEl.appendChild(stop);
+    stop.onclick = () => {
+      activeTarget = null;
+      send({ type: "present", target: null });
+      renderMenu();
+    };
+    listEl.appendChild(stop);
+  }
+
+  function attachTrack(track) {
+    if (track.kind === Track.Kind.Video || track.kind === "video") {
+      track.attach(videoEl);
+      videoEl.play().catch(() => {});
+    } else if (track.kind === Track.Kind.Audio || track.kind === "audio") {
+      track.attach(audioEl);
+      applyVolume();
+      audioEl.play().catch(() => {});
+    }
+  }
+
+  function detachTrack(track) {
+    if (track.kind === Track.Kind.Video || track.kind === "video") {
+      track.detach(videoEl);
+      videoEl.removeAttribute("src");
+      videoEl.load();
+    } else if (track.kind === Track.Kind.Audio || track.kind === "audio") {
+      track.detach(audioEl);
+    }
   }
 
   room.on(RoomEvent.TrackSubscribed, (track) => {
-    if (track.kind === "video") {
-      track.attach(videoEl);
-      log("Recebendo vídeo");
-    }
-    renderBar();
+    attachTrack(track);
+    renderMenu();
   });
 
   room.on(RoomEvent.TrackUnsubscribed, (track) => {
-    if (track.kind === "video") {
-      track.detach(videoEl);
-      log("Transmissão encerrada");
-    }
-    renderBar();
+    detachTrack(track);
+    renderMenu();
   });
 
   for (const ev of [
@@ -66,22 +165,15 @@ async function start() {
     RoomEvent.ParticipantDisconnected,
     RoomEvent.TrackPublished,
     RoomEvent.TrackUnpublished,
+    RoomEvent.TrackMuted,
+    RoomEvent.TrackUnmuted,
   ]) {
-    room.on(ev, renderBar);
+    room.on(ev, renderMenu);
   }
 
-  room.on(RoomEvent.Disconnected, () => log("Desconectado"));
-
-  setInterval(() => {
-    if (videoEl.videoWidth) {
-      document.getElementById("stats").textContent =
-        `Recebendo ${videoEl.videoWidth}x${videoEl.videoHeight}`;
-    }
-  }, 2000);
-
+  applyVolume();
   await room.connect(wsUrl, token);
-  log("Conectado à sala");
-  renderBar();
+  renderMenu();
 }
 
-start().catch((e) => log("Falha: " + e.message));
+start().catch(() => {});
