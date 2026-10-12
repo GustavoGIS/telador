@@ -4,12 +4,23 @@ const log = (m) => (document.getElementById("log").textContent += m + "\n");
 
 document.getElementById("btn").onclick = async () => {
   try {
-    const { token } = await (
-      await fetch("/api/token?role=broadcaster&name=teste")
-    ).json();
+    const key = new URLSearchParams(location.search).get("key") || "";
+    log("key na URL: " + (key ? "sim" : "NÃO"));
+
+    const res = await fetch(
+      `/api/token?role=broadcaster&name=teste&key=${encodeURIComponent(key)}`
+    );
+    const data = await res.json();
+    log("resposta da API: " + (data.token ? "token ok" : JSON.stringify(data)));
+    if (!data.token) return;
+
+    // lê o payload do token só para diagnóstico
+    const payload = JSON.parse(atob(data.token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    log("token assinado com a API Key: " + payload.iss);
+    log("host: " + import.meta.env.VITE_LIVEKIT_HOST);
 
     const room = new Room();
-    await room.connect(`wss://${import.meta.env.VITE_LIVEKIT_HOST}`, token);
+    await room.connect(`wss://${import.meta.env.VITE_LIVEKIT_HOST}`, data.token);
     log("Conectado");
 
     const pub = await room.localParticipant.setScreenShareEnabled(
