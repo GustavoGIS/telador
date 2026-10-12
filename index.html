@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Telador</title>
+    <style>
+      html, body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+        color: #eee;
+        font-family: sans-serif;
+      }
+      #video {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: contain;
+        background: #000;
+      }
+      #hud {
+        position: fixed;
+        top: 8px;
+        left: 8px;
+        max-width: 40vw;
+        max-height: 30vh;
+        overflow: hidden;
+        padding: 6px 10px;
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 8px;
+        font-size: 12px;
+        z-index: 10;
+        pointer-events: none;
+      }
+      #stats { font-weight: bold; margin-bottom: 4px; }
+      #log { margin: 0; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <video id="video" autoplay muted playsinline></video>
+    <div id="hud">
+      <div id="stats"></div>
+      <pre id="log"></pre>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
