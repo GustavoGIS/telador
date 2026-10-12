@@ -37,6 +37,24 @@
       }
       #stats { font-weight: bold; margin-bottom: 4px; }
       #log { margin: 0; white-space: pre-wrap; }
+      #bar {
+        position: fixed;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        z-index: 10;
+      }
+      #bar button {
+        padding: 8px 14px;
+        border: 0;
+        border-radius: 8px;
+        cursor: pointer;
+        background: rgba(88, 101, 242, 0.9);
+        color: #fff;
+        font-size: 14px;
+      }
     </style>
   </head>
   <body>
@@ -45,6 +63,7 @@
       <div id="stats"></div>
       <pre id="log"></pre>
     </div>
+    <div id="bar"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

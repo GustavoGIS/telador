@@ -1,5 +1,7 @@
 import { defineConfig } from "vite";
-import { resolve } from "path";
+import { fileURLToPath } from "url";
+
+const r = (p) => fileURLToPath(new URL(p, import.meta.url));
 
 export default defineConfig({
   envDir: ".",
@@ -12,8 +14,9 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: resolve(__dirname, "index.html"),
-        broadcaster: resolve(__dirname, "broadcaster.html"),
+        main: r("./index.html"),
+        broadcaster: r("./broadcaster.html"),
+        transmissor: r("./transmissor.html"),
       },
     },
   },
