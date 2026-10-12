@@ -3,7 +3,6 @@ import { AccessToken } from "livekit-server-sdk";
 export default async function handler(req, res) {
   const role = req.query.role === "broadcaster" ? "broadcaster" : "viewer";
 
-  // transmissor precisa da chave da galera
   if (role === "broadcaster" && req.query.key !== process.env.TELADOR_KEY) {
     return res.status(401).json({ error: "chave inválida" });
   }
@@ -14,7 +13,7 @@ export default async function handler(req, res) {
   const at = new AccessToken(
     process.env.LIVEKIT_API_KEY,
     process.env.LIVEKIT_API_SECRET,
-    { identity, name }
+    { identity, name, metadata: role }
   );
   at.addGrant({
     room: "galera",
