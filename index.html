@@ -13,13 +13,25 @@
         color: #eee;
         font-family: system-ui, sans-serif;
       }
-      #video {
+      #stage {
         position: fixed;
         inset: 0;
-        width: 100vw;
-        height: 100vh;
+        overflow: hidden;
+        background: #000;
+        touch-action: none;
+        cursor: grab;
+      }
+      #stage.panning { cursor: grabbing; }
+      #video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
         object-fit: contain;
         background: #000;
+        transform-origin: center center;
+        will-change: transform;
+        pointer-events: none;
       }
       #gate {
         position: fixed;
@@ -115,6 +127,37 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         margin-bottom: 2px;
       }
+      #menu .view-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 10px 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        margin-bottom: 2px;
+      }
+      #menu .view-row span {
+        font-size: 11px;
+        color: #aaa;
+        min-width: 42px;
+      }
+      #menu .view-row input[type="range"] {
+        flex: 1;
+        accent-color: #5865f2;
+        cursor: pointer;
+      }
+      #menu .view-row button {
+        border: 0;
+        border-radius: 6px;
+        padding: 4px 8px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #ddd;
+        font-size: 11px;
+        cursor: pointer;
+      }
+      #menu .view-row button:hover {
+        background: rgba(88, 101, 242, 0.55);
+        color: #fff;
+      }
       #menu .empty {
         padding: 8px 12px;
         font-size: 13px;
@@ -157,7 +200,6 @@
         accent-color: #5865f2;
         cursor: pointer;
       }
-      #menu button.stop,
       #menu button.leave {
         display: block;
         width: 100%;
@@ -167,15 +209,11 @@
         border-radius: 6px;
         cursor: pointer;
         background: transparent;
+        color: #f0a0a0;
         font-size: 14px;
       }
-      #menu button.stop { color: #f0a0a0; }
-      #menu button.leave { color: #aaa; }
-      #menu button.stop:hover {
-        background: rgba(255, 80, 80, 0.15);
-      }
       #menu button.leave:hover {
-        background: rgba(255, 255, 255, 0.06);
+        background: rgba(255, 80, 80, 0.15);
       }
       #toggle {
         width: 40px;
@@ -221,11 +259,19 @@
       </form>
     </div>
 
-    <video id="video" autoplay muted playsinline></video>
+    <div id="stage">
+      <video id="video" autoplay muted playsinline></video>
+    </div>
     <audio id="audio" autoplay playsinline></audio>
     <div id="controls">
       <div id="menu" role="menu">
         <div class="room-label" id="room-label"></div>
+        <div class="view-row">
+          <span>Zoom</span>
+          <input id="zoom" type="range" min="100" max="400" value="100" aria-label="Zoom" />
+          <button type="button" id="zoom-fit" title="Encaixar">Fit</button>
+          <button type="button" id="zoom-fill" title="Preencher">Fill</button>
+        </div>
         <div id="broadcasters"></div>
       </div>
       <button id="toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
