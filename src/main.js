@@ -21,6 +21,8 @@ const inDiscord = location.hostname.endsWith("discordsays.com");
 const forceWatch =
   qs.has("watch") || qs.has("sala") || qs.get("mode") === "watch";
 
+document.body.classList.add(inDiscord ? "mode-discord" : "mode-web");
+
 const landingEl = document.getElementById("landing");
 const gateEl = document.getElementById("gate");
 const formEl = document.getElementById("join-form");
@@ -53,6 +55,17 @@ const statsBtn = document.getElementById("stats-btn");
 const diagBtn = document.getElementById("diag-btn");
 const favBtn = document.getElementById("fav-btn");
 const qrBtn = document.getElementById("qr-btn");
+const menuCloseBtn = document.getElementById("menu-close");
+const webMuteBtn = document.getElementById("web-mute");
+const webFavBtn = document.getElementById("web-fav");
+const webLeaveBtn = document.getElementById("web-leave");
+const webFitBtn = document.getElementById("web-fit");
+const webFillBtn = document.getElementById("web-fill");
+const webFsBtn = document.getElementById("web-fs");
+const masterVolEl = document.getElementById("master-volume");
+const barDot = document.getElementById("bar-dot");
+const barLive = document.getElementById("bar-live");
+const barRoom = document.getElementById("bar-room");
 const audioMeter = document.getElementById("audio-meter");
 const waitingEl = document.getElementById("waiting");
 const hudEl = document.getElementById("hud");
@@ -186,14 +199,21 @@ function fillStaticCopy() {
   document.getElementById("zoom-label").textContent = t.zoom;
   zoomFitBtn.textContent = t.fit;
   zoomFillBtn.textContent = t.fill;
-  copyBtn.textContent = t.copyCode;
-  pipBtn.textContent = t.pip;
-  cinemaBtn.textContent = t.cinemaOn;
-  statsBtn.textContent = t.stats;
-  diagBtn.textContent = t.diagCopy;
-  leaveBtn.textContent = t.leave;
-  muteBtn.textContent = t.soundOn;
+  if (webFitBtn) webFitBtn.textContent = t.fit;
+  if (webFillBtn) webFillBtn.textContent = t.fill;
+  document.getElementById("copy-label").textContent = t.copyCode;
+  document.getElementById("pip-label").textContent = t.pip;
+  document.getElementById("cinema-label").textContent = t.cinemaOn;
+  document.getElementById("stats-label").textContent = t.stats;
+  document.getElementById("diag-label").textContent = t.diagCopy;
+  document.getElementById("fav-label").textContent = t.favorite;
+  document.getElementById("leave-label").textContent = t.leave;
+  document.getElementById("mute-label").textContent = t.soundOn;
+  menuCloseBtn?.setAttribute("aria-label", t.menuClose);
+  toggleEl.setAttribute("aria-label", t.menuMore);
+  webFsBtn?.setAttribute("aria-label", t.fullscreen);
   updateFavBtn();
+  syncMuteUi();
 }
 
 function recentRooms() {
@@ -222,10 +242,15 @@ function toggleFav(name) {
 }
 
 function updateFavBtn() {
-  if (!favBtn) return;
-  const on = currentRoomName && isFav(currentRoomName);
-  favBtn.textContent = on ? "★" : "☆";
-  favBtn.title = on ? t.unfavorite : t.favorite;
+  const on = Boolean(currentRoomName && isFav(currentRoomName));
+  for (const btn of [favBtn, webFavBtn]) {
+    if (!btn) continue;
+    btn.classList.toggle("is-on", on);
+    btn.title = on ? t.unfavorite : t.favorite;
+    btn.setAttribute("aria-label", on ? t.unfavorite : t.favorite);
+  }
+  const favLabel = document.getElementById("fav-label");
+  if (favLabel) favLabel.textContent = on ? t.unfavorite : t.favorite;
 }
 
 function pushRecent(name) {
@@ -455,7 +480,33 @@ function applyVolume(name) {
   } catch {
     /* ignore */
   }
-  muteBtn.textContent = muted ? t.soundOff : t.soundOn;
+  syncMuteUi();
+  syncMasterVolume();
+}
+
+function syncMuteUi() {
+  const label = muted ? t.soundOff : t.soundOn;
+  for (const btn of [muteBtn, webMuteBtn]) {
+    if (!btn) continue;
+    btn.classList.toggle("is-muted", muted);
+    btn.setAttribute("aria-label", label);
+    btn.title = label;
+  }
+  const muteLabel = document.getElementById("mute-label");
+  if (muteLabel) muteLabel.textContent = label;
+}
+
+function syncMasterVolume() {
+  if (!masterVolEl) return;
+  const key = audioSourceName || activeTarget;
+  const v = key ? getVolume(key) : Number(masterVolEl.value) / 100 || 0.8;
+  masterVolEl.value = String(Math.round((muted ? 0 : v) * 100));
+}
+
+function setMuted(next) {
+  muted = next;
+  applyVolume();
+  if (!muted) unlockAudio();
 }
 
 function unlockAudio() {
@@ -596,15 +647,19 @@ function participantCount() {
 function updateHud() {
   const live = hasLiveVideo();
   waitingEl.classList.toggle("visible", Boolean(livekitRoom) && !live);
-  hudEl.classList.toggle("visible", Boolean(livekitRoom));
+  hudEl.classList.toggle("visible", Boolean(livekitRoom) && inDiscord);
   hudRoom.textContent = currentRoomName || "—";
   hudViewers.textContent = `${t.viewers}: ${participantCount()}`;
   liveDot.className = "dot " + (live ? "live" : "wait");
   liveText.textContent = live ? t.live : t.waiting;
   overlayWho.textContent = activeTarget ? activeTarget : "";
   stageEl.classList.toggle("show-overlay", live);
+  if (barDot) barDot.className = "dot " + (live ? "live" : "wait");
+  if (barLive) barLive.textContent = live ? t.live : t.waiting;
+  if (barRoom) barRoom.textContent = currentRoomName || "—";
   maybeCrowdToast();
   updateFavBtn();
+  syncMasterVolume();
 }
 
 let statsFrameSample = { frames: 0, at: 0 };
@@ -683,7 +738,7 @@ function renderMenu() {
     pick.className = "pick";
     pick.role = "menuitem";
     const live = p.isScreenShareEnabled;
-    pick.innerHTML = `<span>${live ? "●" : "○"}</span><span>${escapeHtml(p.name)}<div class="meta">${live ? t.transmitting : t.connected}</div></span>`;
+    pick.innerHTML = `<span class="live-mark${live ? " on" : ""}" aria-hidden="true"></span><span>${escapeHtml(p.name)}<div class="meta">${live ? t.transmitting : t.connected}</div></span>`;
     pick.onclick = () => {
       activeTarget = p.name;
       applyVolume(p.name);
@@ -968,13 +1023,13 @@ async function enter(roomName) {
 function setCinema(on) {
   cinema = on;
   document.body.classList.toggle("cinema", cinema);
-  cinemaBtn.textContent = cinema ? t.cinemaOff : t.cinemaOn;
+  cinemaBtn?.classList.toggle("is-on", cinema);
   if (cinema) setMenuOpen(false);
 }
 
 function setStats(on) {
   showStats = on;
-  statsBtn.textContent = showStats ? t.statsOff : t.stats;
+  statsBtn?.classList.toggle("is-on", showStats);
   if (showStats) {
     updateStats();
     clearInterval(statsTimer);
@@ -982,6 +1037,18 @@ function setStats(on) {
   } else {
     clearInterval(statsTimer);
     hudStats.classList.add("hidden");
+  }
+}
+
+async function toggleFullscreen() {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+    await document.documentElement.requestFullscreen();
+  } catch {
+    toast(t.pipFail);
   }
 }
 
@@ -1028,12 +1095,21 @@ recentClear.onclick = () => {
 };
 
 zoomEl.addEventListener("input", () => setZoom(Number(zoomEl.value) / 100));
+function syncViewSeg() {
+  const mode = localStorage.getItem(VIEW_KEY) || "fill";
+  zoomFitBtn?.classList.toggle("on", mode === "fit");
+  zoomFillBtn?.classList.toggle("on", mode === "fill");
+  webFitBtn?.classList.toggle("on", mode === "fit");
+  webFillBtn?.classList.toggle("on", mode === "fill");
+}
+
 zoomFitBtn.onclick = (e) => {
   e.stopPropagation();
   localStorage.setItem(VIEW_KEY, "fit");
   panX = 0;
   panY = 0;
   setZoom(1);
+  syncViewSeg();
 };
 zoomFillBtn.onclick = (e) => {
   e.stopPropagation();
@@ -1041,6 +1117,7 @@ zoomFillBtn.onclick = (e) => {
   panX = 0;
   panY = 0;
   setZoom(fillZoom());
+  syncViewSeg();
 };
 
 stageEl.addEventListener(
@@ -1145,11 +1222,30 @@ document.addEventListener("pointermove", bumpIdle);
 document.addEventListener("keydown", bumpIdle);
 
 leaveBtn.onclick = () => leaveRoom();
-muteBtn.onclick = () => {
-  muted = !muted;
-  applyVolume();
-  if (!muted) unlockAudio();
-};
+webLeaveBtn && (webLeaveBtn.onclick = () => leaveRoom());
+muteBtn.onclick = () => setMuted(!muted);
+webMuteBtn && (webMuteBtn.onclick = () => setMuted(!muted));
+menuCloseBtn && (menuCloseBtn.onclick = () => setMenuOpen(false));
+webFitBtn && (webFitBtn.onclick = () => zoomFitBtn.click());
+webFillBtn && (webFillBtn.onclick = () => zoomFillBtn.click());
+webFsBtn && (webFsBtn.onclick = () => toggleFullscreen());
+webFavBtn &&
+  (webFavBtn.onclick = () => {
+    if (currentRoomName) toggleFav(currentRoomName);
+  });
+
+masterVolEl?.addEventListener("input", () => {
+  const key = audioSourceName || activeTarget || currentRoomName || "default";
+  const v = Number(masterVolEl.value) / 100;
+  volumes[key] = v;
+  if (activeTarget) volumes[activeTarget] = v;
+  if (audioSourceName) volumes[audioSourceName] = v;
+  saveJson(VOL_KEY, volumes);
+  if (v > 0) muted = false;
+  applyVolume(key);
+  if (v > 0) unlockAudio();
+});
+
 copyBtn.onclick = async () => {
   try {
     await navigator.clipboard.writeText(currentRoomName || "");
@@ -1216,15 +1312,13 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") setMenuOpen(false);
   if (e.key === "+" || e.key === "=") setZoom(zoom * 1.1, false);
   if (e.key === "-" || e.key === "_") setZoom(zoom / 1.1, false);
-  if (e.key.toLowerCase() === "m") {
-    muted = !muted;
-    applyVolume();
-    if (!muted) unlockAudio();
-  }
+  if (e.key.toLowerCase() === "m") setMuted(!muted);
   if (e.key.toLowerCase() === "c") setCinema(!cinema);
+  if (e.key.toLowerCase() === "f" && !inDiscord) toggleFullscreen();
 });
 
 renderRecent();
+syncViewSeg();
 
 // Boot: Q7 deep link ?sala= na landing também força watch
 const fromQuery = normalizeRoom(qs.get("sala"));

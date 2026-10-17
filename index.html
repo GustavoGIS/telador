@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Telador</title>
+    <link rel="icon" href="/logo.png" type="image/png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
@@ -11,10 +12,70 @@
     <link rel="stylesheet" href="/src/activity.css" />
   </head>
   <body>
+    <svg xmlns="http://www.w3.org/2000/svg" class="sprite" aria-hidden="true">
+      <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9l6 6 6-6" />
+      </symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 2v2.2M12 19.8V22M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2 12h2.2M19.8 12H22M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6" />
+      </symbol>
+      <symbol id="i-volume" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 10v4h3l4 3V7L7 10H4z" />
+        <path d="M15.5 8.5a4.5 4.5 0 010 7" />
+        <path d="M17.8 6a7.5 7.5 0 010 12" />
+      </symbol>
+      <symbol id="i-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 10v4h3l4 3V7L7 10H4z" />
+        <path d="M18 9l-6 6M12 9l6 6" />
+      </symbol>
+      <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3.4l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 15.8 7.2 18.7l.9-5.4L4.2 9.1l5.4-.8L12 3.4z" />
+      </symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="8" y="8" width="12" height="12" rx="2" />
+        <path d="M4 16V6a2 2 0 012-2h10" />
+      </symbol>
+      <symbol id="i-pip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <rect x="11" y="11" width="8" height="6" rx="1" />
+      </symbol>
+      <symbol id="i-cinema" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="6" width="20" height="12" rx="2" />
+        <path d="M8 6V4M16 6V4M8 20v-2M16 20v-2" />
+      </symbol>
+      <symbol id="i-diag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19V5M4 19h16" />
+        <path d="M8 15l3-4 3 2 4-6" />
+      </symbol>
+      <symbol id="i-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z" />
+      </symbol>
+      <symbol id="i-leave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 7V5a2 2 0 012-2h7a2 2 0 012 2v14a2 2 0 01-2 2h-7a2 2 0 01-2-2v-2" />
+        <path d="M15 12H3M6 8l-4 4 4 4" />
+      </symbol>
+      <symbol id="i-fs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" />
+      </symbol>
+      <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M6 6l12 12M18 6L6 18" />
+      </symbol>
+      <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="8" r="3" />
+        <path d="M3 19c0-3 2.7-5 6-5s6 2 6 5" />
+        <circle cx="17" cy="9" r="2.5" />
+        <path d="M21 19c0-2.4-1.8-4-4-4" />
+      </symbol>
+    </svg>
+
     <!-- Landing pública (fora do Discord) -->
     <div id="landing" class="landing hidden">
       <div class="landing-inner">
-        <div class="brand display">Telador</div>
+        <div class="brand-lockup">
+          <img src="/logo.png" alt="" width="48" height="48" class="brand-logo" />
+          <div class="brand display">Telador</div>
+        </div>
         <h1 id="landing-title" class="display"></h1>
         <p id="landing-body"></p>
         <div class="landing-actions">
@@ -33,7 +94,10 @@
 
     <div id="gate" class="hidden">
       <form class="card" id="join-form">
-        <div class="brand display">Telador</div>
+        <div class="brand-lockup">
+          <img src="/logo.png" alt="" width="40" height="40" class="brand-logo" />
+          <div class="brand display">Telador</div>
+        </div>
         <h1 id="gate-title" class="display"></h1>
         <p id="gate-hint"></p>
         <input id="room-input" name="room" autocomplete="off" spellcheck="false" required />
@@ -44,12 +108,12 @@
         <div class="recent-head">
           <span id="fav-title"></span>
         </div>
-        <div id="favorites"></div>
+        <div id="favorites" class="chip-row"></div>
         <div class="recent-head">
           <span id="recent-title"></span>
           <button type="button" class="linkish" id="recent-clear"></button>
         </div>
-        <div id="recent"></div>
+        <div id="recent" class="chip-row"></div>
         <button type="submit" id="join-btn"></button>
         <div class="connecting hidden" id="connecting">
           <div class="skeleton"></div>
@@ -61,7 +125,7 @@
 
     <div id="error-screen" class="hidden">
       <div class="empty-card">
-        <div class="empty-icon err" aria-hidden="true"></div>
+        <img src="/logo.png" alt="" width="56" height="56" class="wait-logo dim" />
         <h2 id="error-title" class="display"></h2>
         <p id="error-body"></p>
         <div class="landing-actions">
@@ -74,7 +138,7 @@
     <div id="stage">
       <video id="video" autoplay muted playsinline></video>
       <div id="overlay" class="overlay">
-        <div class="pill"><span class="dot" id="live-dot"></span><span id="live-text"></span></div>
+        <div class="pill live-pill"><span class="dot" id="live-dot"></span><span id="live-text"></span></div>
         <div class="pill"><span id="overlay-who"></span></div>
         <div class="meter" id="audio-meter" aria-hidden="true"><i></i></div>
       </div>
@@ -82,9 +146,12 @@
     <audio id="audio" autoplay playsinline></audio>
 
     <div id="waiting">
-      <div class="empty-card">
-        <div class="empty-icon" aria-hidden="true"></div>
-        <h2 id="waiting-title"></h2>
+      <div class="wait-inner">
+        <div class="wait-logo-wrap">
+          <img src="/logo.png" alt="" width="72" height="72" class="wait-logo" />
+          <span class="wait-ring" aria-hidden="true"></span>
+        </div>
+        <h2 id="waiting-title" class="display"></h2>
         <p id="waiting-body"></p>
       </div>
     </div>
@@ -96,49 +163,126 @@
     </div>
 
     <div id="controls">
-      <div id="menu" role="menu">
-        <section class="menu-sec">
-          <div class="sec-title" id="sec-room"></div>
-          <div class="room-label" id="room-label"></div>
-          <div class="row-btns">
-            <button type="button" class="ghost" id="copy-btn"></button>
-            <button type="button" class="ghost" id="pip-btn"></button>
-            <button type="button" class="ghost" id="cinema-btn"></button>
-            <button type="button" class="ghost" id="stats-btn"></button>
-            <button type="button" class="ghost" id="diag-btn"></button>
-            <button type="button" class="ghost" id="fav-btn"></button>
-            <button type="button" class="ghost" id="qr-btn">QR</button>
+      <div id="menu" role="dialog" aria-label="Controles">
+        <header class="menu-head">
+          <img src="/logo.png" alt="" width="28" height="28" class="menu-logo" />
+          <div class="menu-head-text">
+            <div class="menu-kicker">Telador</div>
+            <div class="room-label" id="room-label"></div>
           </div>
-        </section>
-
-        <section class="menu-sec">
-          <div class="sec-title" id="sec-view"></div>
-          <div class="hint" id="menu-hint"></div>
-          <div class="hint faint" id="menu-shortcuts"></div>
-          <div class="view-row">
-            <span id="zoom-label"></span>
-            <input id="zoom" type="range" min="100" max="400" value="100" aria-label="Zoom" />
-            <button type="button" id="zoom-fit"></button>
-            <button type="button" id="zoom-fill"></button>
-          </div>
-        </section>
+          <button type="button" class="icon-btn ghost" id="menu-close" aria-label="Fechar">
+            <svg><use href="#i-close"></use></svg>
+          </button>
+        </header>
 
         <section class="menu-sec">
           <div class="sec-title" id="sec-broadcasters"></div>
           <div id="broadcasters"></div>
         </section>
 
-        <div class="actions">
-          <button type="button" class="mute" id="mute-btn"></button>
-          <button type="button" class="leave" id="leave-btn"></button>
+        <section class="menu-sec">
+          <div class="sec-title" id="sec-view"></div>
+          <div class="view-row">
+            <span id="zoom-label"></span>
+            <input id="zoom" type="range" min="100" max="400" value="100" aria-label="Zoom" />
+            <button type="button" class="seg" id="zoom-fit"></button>
+            <button type="button" class="seg" id="zoom-fill"></button>
+          </div>
+          <div class="hint" id="menu-hint"></div>
+          <div class="hint faint" id="menu-shortcuts"></div>
+        </section>
+
+        <section class="menu-sec">
+          <div class="sec-title" id="sec-room"></div>
+          <div class="tool-grid">
+            <button type="button" class="tool" id="copy-btn">
+              <svg><use href="#i-copy"></use></svg>
+              <span id="copy-label"></span>
+            </button>
+            <button type="button" class="tool" id="fav-btn">
+              <svg class="star"><use href="#i-star"></use></svg>
+              <span id="fav-label"></span>
+            </button>
+            <button type="button" class="tool" id="pip-btn">
+              <svg><use href="#i-pip"></use></svg>
+              <span id="pip-label"></span>
+            </button>
+            <button type="button" class="tool" id="cinema-btn">
+              <svg><use href="#i-cinema"></use></svg>
+              <span id="cinema-label"></span>
+            </button>
+            <button type="button" class="tool" id="stats-btn">
+              <svg><use href="#i-diag"></use></svg>
+              <span id="stats-label"></span>
+            </button>
+            <button type="button" class="tool" id="diag-btn">
+              <svg><use href="#i-diag"></use></svg>
+              <span id="diag-label"></span>
+            </button>
+            <button type="button" class="tool" id="qr-btn">
+              <svg><use href="#i-qr"></use></svg>
+              <span>QR</span>
+            </button>
+          </div>
+        </section>
+
+        <div class="actions discord-only">
+          <button type="button" class="mute bar-btn" id="mute-btn" aria-label="Som">
+            <svg class="ico-on"><use href="#i-volume"></use></svg>
+            <svg class="ico-off"><use href="#i-mute"></use></svg>
+            <span id="mute-label"></span>
+          </button>
+          <button type="button" class="leave bar-btn" id="leave-btn" aria-label="Sair">
+            <svg><use href="#i-leave"></use></svg>
+            <span id="leave-label"></span>
+          </button>
         </div>
       </div>
-      <button id="toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
+
+      <!-- Barra estilo player (site) / FAB (Discord) -->
+      <div id="player-bar">
+        <button type="button" class="bar-btn mute web-only" id="web-mute" aria-label="Som">
+          <svg class="ico-on"><use href="#i-volume"></use></svg>
+          <svg class="ico-off"><use href="#i-mute"></use></svg>
+        </button>
+        <input
+          id="master-volume"
+          class="master-vol web-only"
+          type="range"
+          min="0"
+          max="100"
+          value="80"
+          aria-label="Volume"
+        />
+
+        <div class="bar-meta web-only">
+          <span class="dot" id="bar-dot"></span>
+          <span id="bar-live"></span>
+          <span class="bar-sep">·</span>
+          <span id="bar-room"></span>
+        </div>
+
+        <div class="bar-spacer web-only"></div>
+
+        <button type="button" class="bar-btn seg web-only" id="web-fit"></button>
+        <button type="button" class="bar-btn seg web-only" id="web-fill"></button>
+        <button type="button" class="bar-btn web-only" id="web-fav" aria-label="Favoritar">
+          <svg class="star"><use href="#i-star"></use></svg>
+        </button>
+        <button type="button" class="bar-btn web-only" id="web-fs" aria-label="Tela cheia">
+          <svg><use href="#i-fs"></use></svg>
+        </button>
+        <button type="button" class="bar-btn leave web-only" id="web-leave" aria-label="Sair">
+          <svg><use href="#i-leave"></use></svg>
+        </button>
+
+        <button id="toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
+          <svg class="ico-chevron"><use href="#i-chevron"></use></svg>
+          <svg class="ico-gear"><use href="#i-gear"></use></svg>
+        </button>
+      </div>
     </div>
+
     <div id="toast" role="status"></div>
     <div id="reconnect" class="banner hidden"></div>
     <script type="module" src="/src/main.js"></script>
