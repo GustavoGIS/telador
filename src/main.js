@@ -29,6 +29,8 @@ let sdkReady;
 let livekitRoom = null;
 let activeTarget = null;
 let currentRoomName = null;
+let currentAudioTrack = null;
+let audioSourceName = null;
 const volumes = Object.create(null);
 
 let zoom = 1;
@@ -62,12 +64,21 @@ function getVolume(name) {
   return volumes[name] ?? 0.8;
 }
 
-function applyVolume() {
-  audioEl.volume = activeTarget ? getVolume(activeTarget) : 0.8;
+function applyVolume(name) {
+  const key = name || activeTarget || audioSourceName;
+  const v = key ? getVolume(key) : 0.8;
+  audioEl.volume = v;
+  audioEl.muted = v <= 0;
+  try {
+    currentAudioTrack?.setVolume?.(v);
+  } catch {
+    /* ignore */
+  }
 }
 
 function unlockAudio() {
   applyVolume();
+  audioEl.muted = false;
   audioEl.play().catch(() => {});
 }
 
@@ -181,7 +192,7 @@ function renderMenu() {
     pick.textContent = (p.isScreenShareEnabled ? "● " : "") + "Tela de " + p.name;
     pick.onclick = () => {
       activeTarget = p.name;
-      applyVolume();
+      applyVolume(p.name);
       unlockAudio();
       send({ type: "present", target: p.name });
       renderMenu();
@@ -199,14 +210,17 @@ function renderMenu() {
     slider.max = "100";
     slider.value = String(Math.round(getVolume(p.name) * 100));
     slider.setAttribute("aria-label", "Volume de " + p.name);
-    slider.oninput = () => {
+    const onVol = () => {
       const v = Number(slider.value) / 100;
       volumes[p.name] = v;
-      if (activeTarget === p.name) {
-        audioEl.volume = v;
-        unlockAudio();
+      // Aplica sempre que for o stream atual ou o selecionado
+      if (activeTarget === p.name || audioSourceName === p.name || !audioSourceName) {
+        applyVolume(p.name);
+        if (v > 0) unlockAudio();
       }
     };
+    slider.oninput = onVol;
+    slider.onchange = onVol;
 
     volRow.append(label, slider);
     item.append(pick, volRow);
@@ -231,7 +245,7 @@ function renderMenu() {
   listEl.appendChild(leave);
 }
 
-function attachTrack(track) {
+function attachTrack(track, participant) {
   if (track.kind === Track.Kind.Video || track.kind === "video") {
     track.attach(videoEl);
     videoEl.play().catch(() => {});
@@ -244,9 +258,11 @@ function attachTrack(track) {
     if (videoEl.videoWidth) applyFill();
     else videoEl.addEventListener("loadedmetadata", applyFill, { once: true });
   } else if (track.kind === Track.Kind.Audio || track.kind === "audio") {
+    currentAudioTrack = track;
+    audioSourceName = participant?.name || activeTarget || audioSourceName;
     track.attach(audioEl);
-    applyVolume();
-    audioEl.play().catch(() => {});
+    applyVolume(audioSourceName);
+    unlockAudio();
   }
 }
 
@@ -255,12 +271,16 @@ function detachTrack(track) {
     track.detach(videoEl);
   } else if (track.kind === Track.Kind.Audio || track.kind === "audio") {
     track.detach(audioEl);
+    if (currentAudioTrack === track) {
+      currentAudioTrack = null;
+      audioSourceName = null;
+    }
   }
 }
 
 function bindRoomEvents(room) {
-  room.on(RoomEvent.TrackSubscribed, (track) => {
-    attachTrack(track);
+  room.on(RoomEvent.TrackSubscribed, (track, _pub, participant) => {
+    attachTrack(track, participant);
     renderMenu();
   });
   room.on(RoomEvent.TrackUnsubscribed, (track) => {
@@ -284,6 +304,8 @@ async function disconnectLivekit() {
   livekitRoom = null;
   activeTarget = null;
   currentRoomName = null;
+  currentAudioTrack = null;
+  audioSourceName = null;
   if (room) {
     try {
       await room.disconnect();
