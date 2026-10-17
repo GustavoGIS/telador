@@ -93,14 +93,20 @@ function boot() {
         audio: true,
         systemAudio: "include",
         resolution: { width: 1920, height: 1080, frameRate: 30 },
-        contentHint: "detail",
+        // motion: encoder prioriza temporal (30fps); detail derruba fps sob carga
+        contentHint: "motion",
       },
       {
         videoCodec: "h264",
         simulcast: false,
         screenShareSimulcastLayers: [],
-        screenShareEncoding: { maxBitrate: 8_000_000, maxFramerate: 30 },
-        degradationPreference: "maintain-resolution",
+        screenShareEncoding: {
+          maxBitrate: 10_000_000,
+          maxFramerate: 30,
+          priority: "high",
+        },
+        // maintain-resolution caía para ~15–21fps; framerate primeiro
+        degradationPreference: "maintain-framerate",
       }
     );
     sharing = true;

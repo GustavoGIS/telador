@@ -662,7 +662,26 @@ function updateHud() {
   syncMasterVolume();
 }
 
-let statsFrameSample = { frames: 0, at: 0 };
+let statsFrameSample = { frames: 0, at: 0, fpsEma: 0 };
+let statsRtcTimer = 0;
+let statsRtcFps = 0;
+
+async function pollInboundFps() {
+  const senderOrReceiver = currentVideoTrack?.receiver;
+  if (!senderOrReceiver?.getStats) return;
+  try {
+    const report = await senderOrReceiver.getStats();
+    report.forEach((r) => {
+      if (r.type === "inbound-rtp" && (r.kind === "video" || r.mediaType === "video")) {
+        if (typeof r.framesPerSecond === "number" && r.framesPerSecond > 0) {
+          statsRtcFps = r.framesPerSecond;
+        }
+      }
+    });
+  } catch {
+    /* ignore */
+  }
+}
 
 function updateStats() {
   if (!showStats || !videoEl.videoWidth) {
@@ -670,23 +689,36 @@ function updateStats() {
     return;
   }
   hudStats.classList.remove("hidden");
-  let fpsLabel = "";
-  try {
-    const q = videoEl.getVideoPlaybackQuality?.();
-    if (q) {
-      const now = performance.now();
-      const df = q.totalVideoFrames - statsFrameSample.frames;
-      const dt = (now - statsFrameSample.at) / 1000;
-      if (statsFrameSample.at && dt > 0.4) {
-        fpsLabel = ` · ${Math.round(df / dt)}fps`;
-      }
-      statsFrameSample = { frames: q.totalVideoFrames, at: now };
-    }
-  } catch {
-    /* ignore */
+  if (!statsRtcTimer) {
+    pollInboundFps();
+    statsRtcTimer = setInterval(pollInboundFps, 1000);
   }
-  const trackFps = currentVideoTrack?.mediaStreamTrack?.getSettings?.()?.frameRate;
-  if (!fpsLabel && trackFps) fpsLabel = ` · ~${Math.round(trackFps)}fps`;
+  let fpsLabel = "";
+  // Preferência: FPS do WebRTC (recebido). getVideoPlaybackQuality mede só o paint
+  // e no Discord Activity costuma ficar ~15–21 mesmo com stream a 30.
+  if (statsRtcFps > 0) {
+    fpsLabel = ` · ${Math.round(statsRtcFps)}fps`;
+  } else {
+    try {
+      const q = videoEl.getVideoPlaybackQuality?.();
+      if (q) {
+        const now = performance.now();
+        const df = q.totalVideoFrames - statsFrameSample.frames;
+        const dt = (now - statsFrameSample.at) / 1000;
+        if (statsFrameSample.at && dt > 0.8) {
+          const instant = df / dt;
+          statsFrameSample.fpsEma = statsFrameSample.fpsEma
+            ? statsFrameSample.fpsEma * 0.6 + instant * 0.4
+            : instant;
+          fpsLabel = ` · ~${Math.round(statsFrameSample.fpsEma)}fps`;
+        }
+        statsFrameSample.frames = q.totalVideoFrames;
+        statsFrameSample.at = now;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
   hudStats.textContent = `${videoEl.videoWidth}×${videoEl.videoHeight}${fpsLabel}`;
 }
 
@@ -1033,9 +1065,12 @@ function setStats(on) {
   if (showStats) {
     updateStats();
     clearInterval(statsTimer);
-    statsTimer = setInterval(updateStats, 1500);
+    statsTimer = setInterval(updateStats, 1000);
   } else {
     clearInterval(statsTimer);
+    clearInterval(statsRtcTimer);
+    statsRtcTimer = 0;
+    statsRtcFps = 0;
     hudStats.classList.add("hidden");
   }
 }
