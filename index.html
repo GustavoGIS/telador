@@ -4,275 +4,134 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Telador</title>
-    <style>
-      html, body {
-        margin: 0;
-        height: 100%;
-        overflow: hidden;
-        background: #000;
-        color: #eee;
-        font-family: system-ui, sans-serif;
-      }
-      #stage {
-        position: fixed;
-        inset: 0;
-        overflow: hidden;
-        background: #000;
-        touch-action: none;
-        cursor: grab;
-      }
-      #stage.panning { cursor: grabbing; }
-      #video {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        background: #000;
-        transform-origin: center center;
-        will-change: transform;
-        pointer-events: none;
-      }
-      #gate {
-        position: fixed;
-        inset: 0;
-        z-index: 20;
-        display: grid;
-        place-items: center;
-        background:
-          radial-gradient(ellipse at 50% 20%, rgba(88, 101, 242, 0.25), transparent 55%),
-          #0b0b0f;
-        padding: 24px;
-      }
-      #gate.hidden { display: none; }
-      #gate .card {
-        width: min(360px, 100%);
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      #gate h1 {
-        margin: 0;
-        font-size: 28px;
-        font-weight: 650;
-        letter-spacing: -0.03em;
-      }
-      #gate p {
-        margin: 0;
-        color: #9aa0a6;
-        font-size: 14px;
-        line-height: 1.4;
-      }
-      #gate input {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 12px 14px;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        background: rgba(255, 255, 255, 0.06);
-        color: #fff;
-        font-size: 16px;
-        outline: none;
-      }
-      #gate input:focus {
-        border-color: rgba(88, 101, 242, 0.9);
-      }
-      #gate button {
-        padding: 12px 14px;
-        border: 0;
-        border-radius: 10px;
-        cursor: pointer;
-        background: #5865f2;
-        color: #fff;
-        font-size: 15px;
-        font-weight: 600;
-      }
-      #gate button:disabled {
-        opacity: 0.6;
-        cursor: wait;
-      }
-      #gate .error {
-        min-height: 1.2em;
-        color: #f0a0a0;
-        font-size: 13px;
-      }
-      #controls {
-        position: fixed;
-        right: 12px;
-        bottom: 12px;
-        z-index: 10;
-        display: none;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 8px;
-      }
-      #controls.visible { display: flex; }
-      #menu {
-        display: none;
-        flex-direction: column;
-        gap: 6px;
-        min-width: 240px;
-        max-width: min(320px, calc(100vw - 24px));
-        padding: 8px;
-        background: rgba(20, 20, 24, 0.95);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 10px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-      }
-      #menu.open { display: flex; }
-      #menu .room-label {
-        padding: 4px 10px 8px;
-        font-size: 12px;
-        color: #888;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        margin-bottom: 2px;
-      }
-      #menu .view-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 4px 10px 8px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        margin-bottom: 2px;
-      }
-      #menu .view-row span {
-        font-size: 11px;
-        color: #aaa;
-        min-width: 42px;
-      }
-      #menu .view-row input[type="range"] {
-        flex: 1;
-        accent-color: #5865f2;
-        cursor: pointer;
-      }
-      #menu .view-row button {
-        border: 0;
-        border-radius: 6px;
-        padding: 4px 8px;
-        background: rgba(255, 255, 255, 0.08);
-        color: #ddd;
-        font-size: 11px;
-        cursor: pointer;
-      }
-      #menu .view-row button:hover {
-        background: rgba(88, 101, 242, 0.55);
-        color: #fff;
-      }
-      #menu .empty {
-        padding: 8px 12px;
-        font-size: 13px;
-        color: #888;
-      }
-      #menu .item {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        padding: 8px 10px;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.04);
-      }
-      #menu .item.active {
-        background: rgba(88, 101, 242, 0.35);
-      }
-      #menu .item button.pick {
-        display: block;
-        width: 100%;
-        text-align: left;
-        padding: 0;
-        border: 0;
-        cursor: pointer;
-        background: transparent;
-        color: #fff;
-        font-size: 14px;
-      }
-      #menu .item .volume-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      #menu .item .volume-row span {
-        font-size: 11px;
-        color: #aaa;
-        min-width: 42px;
-      }
-      #menu .item .volume-row input[type="range"] {
-        flex: 1;
-        accent-color: #5865f2;
-        cursor: pointer;
-      }
-      #menu button.leave {
-        display: block;
-        width: 100%;
-        text-align: left;
-        padding: 8px 12px;
-        border: 0;
-        border-radius: 6px;
-        cursor: pointer;
-        background: transparent;
-        color: #f0a0a0;
-        font-size: 14px;
-      }
-      #menu button.leave:hover {
-        background: rgba(255, 80, 80, 0.15);
-      }
-      #toggle {
-        width: 40px;
-        height: 40px;
-        border: 0;
-        border-radius: 50%;
-        cursor: pointer;
-        background: rgba(20, 20, 24, 0.9);
-        color: #fff;
-        display: grid;
-        place-items: center;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-      }
-      #toggle:hover {
-        background: rgba(40, 40, 48, 0.95);
-      }
-      #toggle svg {
-        width: 20px;
-        height: 20px;
-        transition: transform 0.15s ease;
-      }
-      #toggle.open svg {
-        transform: rotate(180deg);
-      }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/theme.css" />
+    <link rel="stylesheet" href="/src/activity.css" />
   </head>
   <body>
-    <div id="gate">
+    <!-- Landing pública (fora do Discord) -->
+    <div id="landing" class="landing hidden">
+      <div class="landing-inner">
+        <div class="brand display">Telador</div>
+        <h1 id="landing-title" class="display"></h1>
+        <p id="landing-body"></p>
+        <div class="landing-actions">
+          <button type="button" class="btn-primary" id="landing-watch"></button>
+          <a class="btn-ghost" href="/salas.html" id="landing-salas"></a>
+          <a
+            class="btn-ghost"
+            id="landing-app"
+            href="https://github.com/GustavoGIS/telador-transmissor/releases"
+            target="_blank"
+            rel="noopener"
+          ></a>
+        </div>
+      </div>
+    </div>
+
+    <div id="gate" class="hidden">
       <form class="card" id="join-form">
-        <h1>Telador</h1>
-        <p>Digite o código da sala para entrar. Cada sala é isolada.</p>
-        <input
-          id="room-input"
-          name="room"
-          autocomplete="off"
-          spellcheck="false"
-          placeholder="código da sala"
-          required
-        />
-        <button type="submit" id="join-btn">Entrar</button>
+        <div class="brand display">Telador</div>
+        <h1 id="gate-title" class="display"></h1>
+        <p id="gate-hint"></p>
+        <input id="room-input" name="room" autocomplete="off" spellcheck="false" required />
+        <label class="auto-row">
+          <input type="checkbox" id="auto-enter" />
+          <span id="auto-label"></span>
+        </label>
+        <div class="recent-head">
+          <span id="fav-title"></span>
+        </div>
+        <div id="favorites"></div>
+        <div class="recent-head">
+          <span id="recent-title"></span>
+          <button type="button" class="linkish" id="recent-clear"></button>
+        </div>
+        <div id="recent"></div>
+        <button type="submit" id="join-btn"></button>
+        <div class="connecting hidden" id="connecting">
+          <div class="skeleton"></div>
+          <span id="connecting-label"></span>
+        </div>
         <div class="error" id="join-error"></div>
       </form>
     </div>
 
+    <div id="error-screen" class="hidden">
+      <div class="empty-card">
+        <div class="empty-icon err" aria-hidden="true"></div>
+        <h2 id="error-title" class="display"></h2>
+        <p id="error-body"></p>
+        <div class="landing-actions">
+          <button type="button" class="btn-primary" id="error-retry"></button>
+          <button type="button" class="btn-ghost" id="error-back"></button>
+        </div>
+      </div>
+    </div>
+
     <div id="stage">
       <video id="video" autoplay muted playsinline></video>
+      <div id="overlay" class="overlay">
+        <div class="pill"><span class="dot" id="live-dot"></span><span id="live-text"></span></div>
+        <div class="pill"><span id="overlay-who"></span></div>
+        <div class="meter" id="audio-meter" aria-hidden="true"><i></i></div>
+      </div>
     </div>
     <audio id="audio" autoplay playsinline></audio>
+
+    <div id="waiting">
+      <div class="empty-card">
+        <div class="empty-icon" aria-hidden="true"></div>
+        <h2 id="waiting-title"></h2>
+        <p id="waiting-body"></p>
+      </div>
+    </div>
+
+    <div id="hud">
+      <div class="pill"><span id="hud-room-label"></span> <strong id="hud-room"></strong></div>
+      <div class="pill" id="hud-viewers"></div>
+      <div class="pill hidden" id="hud-stats"></div>
+    </div>
+
     <div id="controls">
       <div id="menu" role="menu">
-        <div class="room-label" id="room-label"></div>
-        <div class="view-row">
-          <span>Zoom</span>
-          <input id="zoom" type="range" min="100" max="400" value="100" aria-label="Zoom" />
-          <button type="button" id="zoom-fit" title="Encaixar">Fit</button>
-          <button type="button" id="zoom-fill" title="Preencher">Fill</button>
+        <section class="menu-sec">
+          <div class="sec-title" id="sec-room"></div>
+          <div class="room-label" id="room-label"></div>
+          <div class="row-btns">
+            <button type="button" class="ghost" id="copy-btn"></button>
+            <button type="button" class="ghost" id="pip-btn"></button>
+            <button type="button" class="ghost" id="cinema-btn"></button>
+            <button type="button" class="ghost" id="stats-btn"></button>
+            <button type="button" class="ghost" id="diag-btn"></button>
+            <button type="button" class="ghost" id="fav-btn"></button>
+            <button type="button" class="ghost" id="qr-btn">QR</button>
+          </div>
+        </section>
+
+        <section class="menu-sec">
+          <div class="sec-title" id="sec-view"></div>
+          <div class="hint" id="menu-hint"></div>
+          <div class="hint faint" id="menu-shortcuts"></div>
+          <div class="view-row">
+            <span id="zoom-label"></span>
+            <input id="zoom" type="range" min="100" max="400" value="100" aria-label="Zoom" />
+            <button type="button" id="zoom-fit"></button>
+            <button type="button" id="zoom-fill"></button>
+          </div>
+        </section>
+
+        <section class="menu-sec">
+          <div class="sec-title" id="sec-broadcasters"></div>
+          <div id="broadcasters"></div>
+        </section>
+
+        <div class="actions">
+          <button type="button" class="mute" id="mute-btn"></button>
+          <button type="button" class="leave" id="leave-btn"></button>
         </div>
-        <div id="broadcasters"></div>
       </div>
       <button id="toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -280,6 +139,8 @@
         </svg>
       </button>
     </div>
+    <div id="toast" role="status"></div>
+    <div id="reconnect" class="banner hidden"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

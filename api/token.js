@@ -25,10 +25,12 @@ export default async function handler(req, res) {
     }
 
     if (!(await assertRoomExists(room))) {
+      // Soft error: o Transmissor não deve retry agressivo neste caso.
       return res.status(404).json({ error: "sala não encontrada" });
     }
 
     const token = await issueToken({ role, displayName, room });
+    // Contrato estável com Telador Transmissor: { token, room }
     res.json({ token, room });
   } catch (e) {
     res.status(500).json({ error: e.message || "erro ao emitir token" });

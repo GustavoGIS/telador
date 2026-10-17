@@ -1,7 +1,14 @@
 <!doctype html>
-<html>
-  <head><meta charset="UTF-8" /><title>Transmissor</title></head>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Telador Transmissor (worker)</title>
+  </head>
   <body>
+    <!--
+      Fallback remoto do Electron. Não use APIs de browser aqui além do que
+      window.telador (preload) e window.__startShare expõem.
+    -->
     <script type="module" src="/src/transmissor.js"></script>
   </body>
 </html>

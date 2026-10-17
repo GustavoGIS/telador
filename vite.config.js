@@ -18,6 +18,14 @@ export default defineConfig({
         broadcaster: r("./broadcaster.html"),
         transmissor: r("./transmissor.html"),
         salas: r("./salas.html"),
+        status: r("./status.html"),
+      },
+      output: {
+        // P10: LiveKit em chunk separado (landing/páginas leves não precisam parseá-lo junto)
+        manualChunks(id) {
+          if (id.includes("livekit-client")) return "livekit";
+          if (id.includes("@discord/embedded-app-sdk")) return "discord-sdk";
+        },
       },
     },
   },

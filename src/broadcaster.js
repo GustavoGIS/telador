@@ -35,7 +35,8 @@ document.getElementById("btn").onclick = async () => {
       {
         videoCodec: "h264",
         simulcast: false,
-        screenShareEncoding: { maxBitrate: 6_000_000, maxFramerate: 30 },
+        screenShareSimulcastLayers: [],
+        screenShareEncoding: { maxBitrate: 8_000_000, maxFramerate: 30 },
         degradationPreference: "maintain-resolution",
       }
     );

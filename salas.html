@@ -4,80 +4,71 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Telador — Salas</title>
+    <link rel="stylesheet" href="/src/theme.css" />
     <style>
-      html, body {
-        margin: 0;
-        min-height: 100%;
-        background: #0b0b0f;
-        color: #eee;
-        font-family: system-ui, sans-serif;
-      }
       main {
-        max-width: 480px;
+        max-width: 520px;
         margin: 0 auto;
-        padding: 32px 20px 48px;
+        padding: 40px 20px 56px;
         display: flex;
         flex-direction: column;
-        gap: 20px;
+        gap: 22px;
       }
       h1 {
-        margin: 0;
-        font-size: 28px;
-        letter-spacing: -0.03em;
+        margin: 6px 0 0;
+        font-size: 32px;
+        letter-spacing: -0.04em;
       }
       p {
         margin: 0;
-        color: #9aa0a6;
+        color: var(--muted);
         font-size: 14px;
-        line-height: 1.45;
+        line-height: 1.5;
       }
       label {
         display: block;
         font-size: 12px;
-        color: #aaa;
+        color: var(--muted);
         margin-bottom: 6px;
       }
       input {
         width: 100%;
-        box-sizing: border-box;
-        padding: 11px 12px;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        background: rgba(255, 255, 255, 0.06);
-        color: #fff;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
         font-size: 15px;
         outline: none;
       }
-      input:focus { border-color: #5865f2; }
-      .row {
-        display: flex;
-        gap: 8px;
-      }
+      input:focus { border-color: var(--accent); }
+      .row { display: flex; gap: 8px; }
       .row input { flex: 1; }
       button {
         border: 0;
-        border-radius: 10px;
-        padding: 11px 14px;
+        border-radius: 12px;
+        padding: 12px 14px;
         cursor: pointer;
-        background: #5865f2;
+        background: linear-gradient(180deg, var(--accent-hi), var(--accent));
         color: #fff;
         font-size: 14px;
-        font-weight: 600;
+        font-weight: 650;
         white-space: nowrap;
+      }
+      button.ghost {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        border: 1px solid var(--line);
       }
       button.danger {
         background: transparent;
-        color: #f0a0a0;
-        border: 1px solid rgba(240, 160, 160, 0.35);
+        color: var(--danger);
+        border: 1px solid rgba(240, 113, 120, 0.35);
       }
       button:disabled { opacity: 0.55; cursor: wait; }
-      .msg {
-        min-height: 1.2em;
-        font-size: 13px;
-        color: #9aa0a6;
-      }
-      .msg.error { color: #f0a0a0; }
-      .msg.ok { color: #8fd49a; }
+      .msg { min-height: 1.2em; font-size: 13px; color: var(--muted); }
+      .msg.error { color: var(--danger); }
+      .msg.ok { color: var(--ok); }
       ul {
         list-style: none;
         margin: 0;
@@ -91,39 +82,84 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding: 12px 14px;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 14px;
+        border-radius: var(--radius);
+        background: var(--panel);
+        border: 1px solid var(--line);
       }
-      li code {
-        font-size: 15px;
-        color: #fff;
-      }
+      li code { font-size: 15px; color: var(--text); }
+      li .ops { display: flex; gap: 6px; }
       .meta { font-size: 12px; color: #777; }
+      .card {
+        padding: 16px;
+        border-radius: var(--radius);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .health {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .nav {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .nav a {
+        color: var(--accent);
+        font-size: 13px;
+        text-decoration: none;
+      }
     </style>
   </head>
   <body>
     <main>
       <div>
-        <h1>Salas Telador</h1>
+        <div class="brand">Telador</div>
+        <h1>Salas</h1>
         <p>
-          Máximo de 5 salas. O nome da sala é a key: use no transmissor e peça
-          para os espectadores digitarem o mesmo código na Activity.
+          Máximo de 5 salas. O nome é a key do <strong>Telador Transmissor</strong>
+          e o código da Activity / viewer.
         </p>
         <p class="meta" id="count">0 / 5 salas</p>
+        <div class="nav">
+          <a href="/?watch=1">Viewer</a>
+          <a href="/">Início</a>
+          <a href="/status.html">Status</a>
+        </div>
       </div>
 
-      <div>
-        <label for="admin">Chave admin</label>
-        <input id="admin" type="password" autocomplete="current-password" />
+      <div class="card">
+        <div class="sec-title" style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Status</div>
+        <div class="health" id="health"></div>
       </div>
 
-      <div>
-        <label for="name">Nova sala</label>
-        <div class="row">
-          <input id="name" placeholder="ex: festa, squad1" autocomplete="off" spellcheck="false" />
-          <button type="button" id="create">Criar</button>
+      <div class="card hidden" id="qr-card">
+        <div class="sec-title" style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">QR da sala</div>
+        <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+          <img id="qr-img" alt="QR da sala" width="140" height="140" style="border-radius:12px;background:#fff;padding:8px" />
+          <div>
+            <code id="qr-name"></code>
+            <p class="meta" id="qr-url" style="margin-top:8px;word-break:break-all"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div>
+          <label for="admin">Chave admin</label>
+          <input id="admin" type="password" autocomplete="current-password" />
+        </div>
+        <div>
+          <label for="name">Nova sala</label>
+          <div class="row">
+            <input id="name" placeholder="ex: festa, squad1" autocomplete="off" spellcheck="false" />
+            <button type="button" id="create">Criar</button>
+          </div>
         </div>
       </div>
 

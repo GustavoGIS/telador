@@ -6,6 +6,7 @@ import {
   assertRoomExists,
   createTeladorRoom,
   deleteTeladorRoom,
+  getRoomService,
   issueToken,
   listTeladorRooms,
   normalizeRoomName,
@@ -13,6 +14,30 @@ import {
 
 const app = express();
 app.use(express.json());
+
+app.get("/api/health", async (_req, res) => {
+  const out = {
+    ok: true,
+    livekit: false,
+    rooms: 0,
+    time: new Date().toISOString(),
+  };
+  try {
+    out.rooms = (await listTeladorRooms()).length;
+  } catch (e) {
+    out.ok = false;
+    out.roomsError = e.message;
+  }
+  try {
+    await getRoomService().listRooms();
+    out.livekit = true;
+  } catch (e) {
+    out.ok = false;
+    out.livekit = false;
+    out.livekitError = e.message;
+  }
+  res.status(out.ok ? 200 : 503).json(out);
+});
 
 app.get("/api/rooms", async (req, res) => {
   try {

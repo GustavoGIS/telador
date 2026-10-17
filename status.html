@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Telador — Status</title>
+    <link rel="stylesheet" href="/src/theme.css" />
+    <style>
+      main {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: calc(40px + var(--safe-t)) 20px calc(48px + var(--safe-b));
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      h1 {
+        margin: 6px 0 0;
+        font-family: var(--display);
+        font-size: 32px;
+        letter-spacing: -0.04em;
+      }
+      p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+      .card {
+        padding: 16px;
+        border-radius: var(--radius);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 14px;
+      }
+      .muted { color: var(--muted); font-size: 12px; }
+      a { color: var(--accent); text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div>
+        <div class="brand display">Telador</div>
+        <h1>Status</h1>
+        <p>Saúde pública da API e do LiveKit (sem chave admin).</p>
+      </div>
+      <div class="card" id="card">
+        <div class="muted">Carregando…</div>
+      </div>
+      <p><a href="/">Início</a> · <a href="/salas.html">Salas</a> · <a href="/?watch=1">Viewer</a></p>
+    </main>
+    <script type="module">
+      const card = document.getElementById("card");
+      try {
+        const res = await fetch("/api/health");
+        const data = await res.json();
+        card.innerHTML = `
+          <div class="row"><span>API</span><strong>${data.ok ? "ok" : "alerta"}</strong></div>
+          <div class="row"><span>LiveKit</span><strong>${data.livekit ? "ok" : "falhou"}</strong></div>
+          <div class="row"><span>Salas no registry</span><strong>${data.rooms ?? "—"}</strong></div>
+          <div class="muted">${data.time || ""}</div>
+          ${data.livekitError ? `<div class="muted">${data.livekitError}</div>` : ""}
+        `;
+      } catch (e) {
+        card.innerHTML = `<div class="muted">Falha ao consultar /api/health</div>`;
+      }
+    </script>
+  </body>
+</html>
