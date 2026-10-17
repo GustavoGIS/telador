@@ -92,8 +92,8 @@ body.cinema .overlay { opacity: 0 !important; }
 
 .wait-logo-wrap {
   position: relative;
-  width: 88px;
-  height: 88px;
+  width: 120px;
+  height: 120px;
   display: grid;
   place-items: center;
 }
@@ -108,14 +108,52 @@ body.cinema .overlay { opacity: 0 !important; }
 
 .wait-logo.dim { opacity: 0.85; margin: 0 auto 12px; }
 
-.wait-ring {
+/* Luz suave atrás do ícone, girando */
+.wait-glow {
   position: absolute;
-  inset: 0;
-  border-radius: 22px;
-  border: 2px solid transparent;
-  border-top-color: var(--accent-2);
-  border-right-color: rgba(74, 163, 255, 0.35);
-  animation: spin 1.1s linear infinite;
+  inset: -8px;
+  border-radius: 50%;
+  z-index: 0;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 40deg,
+    rgba(94, 200, 255, 0.08) 90deg,
+    rgba(74, 163, 255, 0.55) 150deg,
+    rgba(110, 180, 255, 0.9) 180deg,
+    rgba(74, 163, 255, 0.55) 210deg,
+    rgba(94, 200, 255, 0.08) 270deg,
+    transparent 320deg,
+    transparent 360deg
+  );
+  filter: blur(14px);
+  opacity: 0.95;
+  animation: waitGlowSpin 2.8s linear infinite;
+  pointer-events: none;
+}
+
+.wait-glow::after {
+  content: "";
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(74, 163, 255, 0.35) 0%,
+    rgba(74, 163, 255, 0.08) 45%,
+    transparent 70%
+  );
+  filter: blur(6px);
+  animation: waitGlowPulse 2.8s ease-in-out infinite;
+}
+
+@keyframes waitGlowSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes waitGlowPulse {
+  0%, 100% { opacity: 0.7; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1.05); }
 }
 
 #waiting h2 {
